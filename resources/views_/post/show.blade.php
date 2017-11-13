@@ -12,7 +12,7 @@
     <div class="section">
         <span class="label">Seccion:</span>
         <a href="{{ route('section.show', [$post->section()->id]) }}">
-            {{$post->section()->section}}
+            {{$post->section()-section}}
         </a>
     </div>
     <div class="tags">
@@ -22,5 +22,4 @@
             </a>
         @endforeach
     </div>
-
 @endsection

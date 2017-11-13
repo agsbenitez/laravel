@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Tag;
 
 class TagController extends Controller
 {
@@ -13,7 +14,11 @@ class TagController extends Controller
      */
     public function index()
     {
-        //
+        $tag = Tag::orderByDesc('id')
+        ->get();
+
+        return view('tag.index')
+            ->with('tag', $tag);
     }
 
     /**
@@ -54,9 +59,9 @@ class TagController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Tag $tag)
     {
-        //
+        return view('tag.formnew', ['tag'=>$tag]);
     }
 
     /**
@@ -67,8 +72,25 @@ class TagController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
+
     {
-        //
+
+        Try {
+            $tags = Tag::find($id);
+            $tags->tag = $request->post('Tag');
+            $tags->save();
+
+            $msg = 'Seccion Actualizada';
+            $flash = 'Ok';
+        }catch (\Exception $e)
+        {
+            $flash = 'error';
+            $msg = $e->getMessage();
+        }
+
+        return redirect()
+            ->route('tag.index')
+            ->with($flash, $msg);
     }
 
     /**
@@ -77,8 +99,15 @@ class TagController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Tag $tag)
+
     {
-        //
+        
+        $tag->delete();
+        $msg= 'Tag Eliminado';
+        $flash= 'Ok';
+
+        return redirect()->route('tag.index')
+            ->with($flash, $msg);
     }
 }

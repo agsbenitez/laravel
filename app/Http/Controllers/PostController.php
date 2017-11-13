@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Post;
 use App\Section;
+use App\Tag;
+use App\PostsTags;
 
 use Illuminate\Http\Request;
+use PhpParser\Node\Stmt\TryCatch;
 
 class PostController extends Controller
 {
@@ -31,9 +34,10 @@ class PostController extends Controller
      */
     public function create()
     {
-        $sect=Section::all();
+        $sect = Section::all();
+        $tag = Tag::all();
 
-        return view('post.formnew', ['secciones'=>$sect]);
+        return view('post.formnew', ['secciones'=>$sect, 'tags'=>$tag]);
 
     }
 
@@ -45,9 +49,14 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+
+
         $titulo = $request->get('title');
         $body = $request->body;
         $section = $request->get('section');
+        $tag = $request->get('tags');
+
+
         try
         {
             $post = new Post();
@@ -55,6 +64,13 @@ class PostController extends Controller
             $post->body = $body;
             $post->section_id=$section;
             $post->save();
+            foreach ($tag as $tag_id)
+            {
+                $postTag = new PostsTags();
+                $postTag->post_id = $post->id;
+                $postTag->tag_id = $tag_id;
+                $postTag->save();
+            }
             $flash='ok';
             $msg='Creado';
         }catch (\Exception $e)
@@ -62,7 +78,6 @@ class PostController extends Controller
          $flash = 'error';
          $msg = $e->getMessage();
         }
-
 
 
         return redirect()
@@ -77,9 +92,12 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Post $post)
     {
-        //
+        return view('post.view')
+            ->with('post', $post);
+
+
     }
 
     /**
@@ -88,9 +106,13 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Post $post)
+
     {
-        //
+        $sect = Section::all();
+        $tag = Tag::all();
+        return view('post.formnew', ['post'=>$post, 'secciones'=>$sect, 'tags'=>$tag])
+            ->with('post', $post);
     }
 
     /**
@@ -102,7 +124,40 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
+        Try
+        {
+        $registro = Post::find($id);
+        $registro->title = $request->post('title');
+        $registro->body = $request->post('body');
+        $registro->section_id = $request->post('section');
+        $registro->save();
+
+        PostsTags::where('post_id', $id)
+            ->delete();
+
+        foreach ($request->post('tags') as $tag_id)
+            {
+                $postTag = new PostsTags();
+                $postTag->post_id = $id;
+                $postTag->tag_id = $tag_id;
+                $postTag->save();
+            }
+
+        $msg = 'Post Actualizado';
+        $flash = 'Ok';
+
+
+        }catch (\Exception $e)
+        {
+            $flash = 'error';
+            $msg = $e->getMessage();
+        }
+
+        return redirect()
+            ->route('post.index')
+            ->with($flash, $msg);
+
     }
 
     /**
@@ -111,8 +166,17 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Post $post)
     {
-        //
+        PostsTags::where('post_id', $post->id)
+        ->delete();
+
+        $post->delete();
+        $msg= 'Post Eliminado';
+        $flash= 'Ok';
+
+        return redirect()->route('post.index')
+            ->with($flash, $msg);
+
     }
 }

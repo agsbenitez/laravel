@@ -8,7 +8,7 @@
     @if(!empty($tag))<input name="_method" type="hidden" value="PUT">@endif
         <p>
             <label for="titulo">Tag</label>
-                <input type="text" name="Tag" value=@if (!empty($tag))"{{$tag->tag}}" >@else() "" @endif
+                <input type="text" name="Tag" value=@if (!empty($tag))"{{$tag->tag}}" >@else() "" @endif>
 
 
             <input type="submit" value="Guardar" class="btn btn-success">

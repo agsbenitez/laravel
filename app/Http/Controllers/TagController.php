@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use App\Tag;
+use App\PostsTags;
 
 class TagController extends Controller
 {
@@ -28,7 +30,7 @@ class TagController extends Controller
      */
     public function create()
     {
-        //
+        return view('tag.formnew');
     }
 
     /**
@@ -102,10 +104,18 @@ class TagController extends Controller
     public function destroy(Tag $tag)
 
     {
-        
+        try{
+        $post_tag = PostsTags::where('tag_id', $tag->id);
+
+        $post_tag->delete();
+
         $tag->delete();
         $msg= 'Tag Eliminado';
         $flash= 'Ok';
+        }catch (QueryException $e){
+            $msg="Error de Borrado";
+            $flash="error";
+        }
 
         return redirect()->route('tag.index')
             ->with($flash, $msg);

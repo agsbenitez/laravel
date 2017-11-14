@@ -11,4 +11,6 @@ class Tag extends Model
             ->orderBy('id')
             ->get();
     }
+
+
 }
